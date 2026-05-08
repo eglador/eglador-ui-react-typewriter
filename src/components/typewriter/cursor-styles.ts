@@ -19,11 +19,6 @@ const STYLES = `
 }
 `;
 
-/**
- * Injects the cursor blink keyframes into `<head>` once per page.
- * Library-friendly — consumers don't need to import a CSS file or
- * configure Tailwind's `@theme` keyframes block.
- */
 export function ensureCursorStyles(): void {
   if (typeof document === "undefined") return;
   if (document.getElementById(STYLE_ID)) return;

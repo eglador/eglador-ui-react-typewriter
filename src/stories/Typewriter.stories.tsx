@@ -9,7 +9,7 @@ import {
 } from "../components/typewriter";
 
 type PlaygroundArgs = {
-  texts: string;
+  items: string;
   typingSpeed: number;
   deletingSpeed: number;
   pauseDuration: number;
@@ -39,8 +39,6 @@ const PUNCT_PRESET: Record<string, number> = {
 
 const LOREM_IPSUM =
   "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.";
-
-// ── Lucide-style SVG icons (inline — story-only, not part of the bundle) ──
 
 const ICON_PROPS = {
   width: 14,
@@ -102,14 +100,9 @@ function ControlButton({ onClick, icon, label }: ControlButtonProps) {
   );
 }
 
-/** Storybook's "Show code" defaults to displaying the wrapper component
- *  (`<PlaygroundDemo ... />`), which hides the actual compound API. This
- *  transform regenerates the snippet using the real `<Typewriter>` +
- *  `<Typewriter.Item>` JSX users would write — exactly mirroring the
- *  current Controls panel state, with default-valued props omitted. */
 function playgroundCodeTransform(_src: string, ctx: { args: PlaygroundArgs }) {
   const a = ctx.args;
-  const items = a.texts
+  const items = a.items
     .split("\n")
     .filter((s) => s.length > 0)
     .map((line) => `  <Typewriter.Item>${line}</Typewriter.Item>`)
@@ -120,7 +113,6 @@ function playgroundCodeTransform(_src: string, ctx: { args: PlaygroundArgs }) {
     if (cond) props.push(`  ${prop}`);
   };
 
-  // Only emit non-default values to keep the snippet tight.
   push(a.typingSpeed !== 60, `typingSpeed={${a.typingSpeed}}`);
   push(a.deletingSpeed !== 30, `deletingSpeed={${a.deletingSpeed}}`);
   push(a.pauseDuration !== 2000, `pauseDuration={${a.pauseDuration}}`);
@@ -153,7 +145,7 @@ const meta: Meta<PlaygroundArgs> = {
     docs: {
       description: {
         component:
-          "Tek noktadan tüm özelliklerin canlı test edildiği master playground. Controls panelinden hız, gecikme, döngü modu, cursor ve daha fazlası ayarlanabilir. Items compound API ile (`<Typewriter.Item>`) render edilir — \"Show code\" görünümü kullanıcının yazacağı gerçek JSX'i gösterir.",
+          "Master playground for live-testing every option from the Controls panel. Items are rendered via the compound `<Typewriter.Item>` API; the `Show code` panel mirrors the JSX you would write.",
       },
       source: {
         type: "code",
@@ -163,7 +155,7 @@ const meta: Meta<PlaygroundArgs> = {
     },
   },
   args: {
-    texts: [
+    items: [
       "Build with React.",
       "Style with Tailwind.",
       "Ship faster.",
@@ -186,89 +178,107 @@ const meta: Meta<PlaygroundArgs> = {
     className: "text-3xl font-semibold text-zinc-900",
   },
   argTypes: {
-    texts: {
+    items: {
       control: "text",
       table: { category: "Items" },
       description:
-        "Yazılacak metinler — her satır ayrı bir `<Typewriter.Item>` olarak render edilir.",
+        "Each line becomes a `<Typewriter.Item>`. Multiline textbox for live editing.",
     },
     typingSpeed: {
       control: { type: "range", min: 10, max: 300, step: 5 },
       table: { category: "Timing" },
+      description: "Milliseconds per typed character.",
     },
     deletingSpeed: {
       control: { type: "range", min: 5, max: 200, step: 5 },
       table: { category: "Timing" },
+      description: "Milliseconds per deleted character.",
     },
     pauseDuration: {
       control: { type: "range", min: 0, max: 5000, step: 100 },
       table: { category: "Timing" },
+      description: "Hold duration on a completed string before deleting.",
     },
     startDelay: {
       control: { type: "range", min: 0, max: 3000, step: 100 },
       table: { category: "Timing" },
+      description: "Wait before the very first keystroke.",
     },
     variance: {
       control: { type: "range", min: 0, max: 0.8, step: 0.05 },
       table: { category: "Timing" },
-      description: "Her karakter delay'ine ±jitter (0 = sabit hız, 0.3 = doğal his).",
+      description:
+        "± jitter applied to every character delay (0 = perfectly steady, 0.3 = natural).",
     },
     punctuationDelays: {
       control: "boolean",
       name: "Punctuation pauses",
       table: { category: "Timing" },
       description:
-        ". ! ? , ; : karakterlerinden sonra ekstra duraklama (preset).",
+        "Apply a preset of extra delays after . ! ? , ; : characters.",
     },
     loop: {
       control: "boolean",
       table: { category: "Behavior" },
+      description: "Cycle through items indefinitely.",
     },
     deleteMode: {
       control: "radio",
       options: ["backspace", "clear", "smart"] satisfies DeleteMode[],
       table: { category: "Behavior" },
+      description:
+        "How to clear the current item before typing the next: per-character (`backspace`), instant (`clear`), or keep common prefix (`smart`).",
     },
     autoStart: {
       control: "boolean",
       table: { category: "Behavior" },
+      description:
+        "Animate on mount. Set to `false` to drive the animation purely via controls.",
     },
     respectReducedMotion: {
       control: "boolean",
       name: "Reduced motion",
       table: { category: "Behavior" },
+      description:
+        "Honor `prefers-reduced-motion: reduce` — render the final item instantly.",
     },
     cursor: {
       control: "boolean",
       table: { category: "Cursor" },
+      description: "Show the blinking cursor.",
     },
     cursorStyle: {
       control: "radio",
       options: ["line", "block", "underscore"] satisfies CursorStyle[],
       table: { category: "Cursor" },
       if: { arg: "cursor", truthy: true },
+      description: "Visual variant of the geometric cursor.",
     },
     cursorBlink: {
       control: "radio",
       options: ["smooth", "hard", "none"] satisfies CursorBlink[],
       table: { category: "Cursor" },
       if: { arg: "cursor", truthy: true },
+      description: "Blink animation style.",
     },
     cursorChar: {
       control: "text",
       table: { category: "Cursor" },
       description:
-        "Geometric cursor yerine custom karakter (örn: ▌ _ |).",
+        "Override the geometric cursor with a custom character (e.g. ▌ _ |).",
       if: { arg: "cursor", truthy: true },
     },
     hideCursorWhenDone: {
       control: "boolean",
       table: { category: "Cursor" },
       if: { arg: "cursor", truthy: true },
+      description:
+        "Hide the cursor when animation finishes (only meaningful when `loop` is `false`).",
     },
     className: {
       control: "text",
       table: { category: "Styling" },
+      description: "Class on the wrapping element.",
     },
   },
 };
@@ -277,8 +287,8 @@ export default meta;
 
 function PlaygroundDemo(args: PlaygroundArgs) {
   const lines = React.useMemo(
-    () => args.texts.split("\n").filter((s) => s.length > 0),
-    [args.texts],
+    () => args.items.split("\n").filter((s) => s.length > 0),
+    [args.items],
   );
 
   const controlsRef = React.useRef<TypewriterControls>(null);
@@ -343,14 +353,12 @@ export const Playground: StoryObj<PlaygroundArgs> = {
   render: (args) => <PlaygroundDemo {...args} />,
 };
 
-// ── Preset stories ─────────────────────────────────────────────────
-
 export const SmartBackspace: StoryObj = {
   parameters: {
     docs: {
       description: {
         story:
-          "`deleteMode=\"smart\"` — sıradaki string ile ortak prefix korunur, sadece fark silinir/yazılır.",
+          "`deleteMode=\"smart\"` keeps the longest common prefix between consecutive items, deleting only the differing suffix.",
       },
     },
   },
@@ -363,12 +371,12 @@ export const SmartBackspace: StoryObj = {
   ),
 };
 
-export const PerItemOverrides: StoryObj = {
+export const PerItemTiming: StoryObj = {
   parameters: {
     docs: {
       description: {
         story:
-          "Compound API ile her `Typewriter.Item` kendi `typingSpeed` / `deletingSpeed` / `pauseDuration` değerlerini ayarlayabilir — parent değerlerini override eder.",
+          "Every `Typewriter.Item` may override `typingSpeed`, `deletingSpeed`, and `pauseDuration` for itself, falling back to the parent value otherwise.",
       },
     },
   },
@@ -387,12 +395,39 @@ export const PerItemOverrides: StoryObj = {
   ),
 };
 
+export const PerItemStyling: StoryObj = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Every `Typewriter.Item` accepts its own `className` and `style` — the active item's styling is applied to the live text. The container `<Typewriter>` keeps its own class for layout / typography.",
+      },
+    },
+  },
+  render: () => (
+    <Typewriter
+      deleteMode="smart"
+      className="text-3xl font-semibold"
+    >
+      <Typewriter.Item className="text-blue-600">Build with React.</Typewriter.Item>
+      <Typewriter.Item className="text-cyan-500">
+        Style with Tailwind.
+      </Typewriter.Item>
+      <Typewriter.Item
+        className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent"
+      >
+        Ship faster.
+      </Typewriter.Item>
+    </Typewriter>
+  ),
+};
+
 export const NaturalTyping: StoryObj = {
   parameters: {
     docs: {
       description: {
         story:
-          "Yüksek `variance` ve `punctuationDelays` — gerçek bir insanın yazdığı hissi.",
+          "High `variance` plus `punctuationDelays` produce a natural, human-like typing rhythm.",
       },
     },
   },
@@ -418,7 +453,7 @@ export const HardBlinkBlockCursor: StoryObj = {
     docs: {
       description: {
         story:
-          "Terminal hissi — block cursor + hard blink + monospace font.",
+          "Terminal feel — block cursor + hard blink + monospace font.",
       },
     },
   },
@@ -438,7 +473,7 @@ export const CustomCursorChar: StoryObj = {
   parameters: {
     docs: {
       description: {
-        story: "Geometric cursor yerine custom karakter (`▌`).",
+        story: "Use any character as the cursor (`▌`).",
       },
     },
   },
@@ -455,14 +490,17 @@ export const RenderProp: StoryObj = {
     docs: {
       description: {
         story:
-          "Render-prop API — `render` prop'u ile kendi UI'ını çiz, items yine `<Typewriter.Item>` ile gelir.",
+          "Render-prop API — supply `render` to take full control of the wrapping markup. Items are still passed via `<Typewriter.Item>`. The render function also receives the active `item` so you can read its `className` / `style`.",
       },
     },
   },
   render: () => (
     <Typewriter
-      render={({ text, cursor, phase }) => (
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      render={({ text, cursor, phase, item }) => (
+        <h1
+          className={`text-4xl font-bold ${item?.className ?? ""}`}
+          style={item?.style}
+        >
           <span aria-hidden="true">{text}</span>
           <span className="text-zinc-900">{cursor}</span>
           <span className="block mt-2 text-xs font-normal text-zinc-500">
@@ -471,8 +509,12 @@ export const RenderProp: StoryObj = {
         </h1>
       )}
     >
-      <Typewriter.Item>Wrap me in any element</Typewriter.Item>
-      <Typewriter.Item>Compose freely</Typewriter.Item>
+      <Typewriter.Item className="text-blue-600">
+        Wrap me in any element
+      </Typewriter.Item>
+      <Typewriter.Item className="text-emerald-600">
+        Compose freely
+      </Typewriter.Item>
     </Typewriter>
   ),
 };
@@ -482,7 +524,7 @@ export const NonLooping: StoryObj = {
     docs: {
       description: {
         story:
-          "`loop=false` + `hideCursorWhenDone` — tek seferlik animasyon, biter ve cursor kaybolur.",
+          "`loop={false}` plus `hideCursorWhenDone` — single pass animation that ends and removes the cursor.",
       },
     },
   },
@@ -502,7 +544,7 @@ export const SingleString: StoryObj = {
     docs: {
       description: {
         story:
-          "Tek string için ergonomik kısayol — `<Typewriter.Item>` olmadan doğrudan string children.",
+          "Shorthand for a single item — pass a plain string child instead of `<Typewriter.Item>`.",
       },
     },
   },
@@ -518,7 +560,7 @@ export const Paragraph: StoryObj = {
     docs: {
       description: {
         story:
-          "Uzun-form prose — Lorem Ipsum metni okuyan ritimde yazılır. Yüksek `variance` ve `punctuationDelays` ile gerçekçi insan-yazımı hissi; `loop=false` + `hideCursorWhenDone` ile bittiğinde durur.",
+          "Long-form prose — Lorem Ipsum typed at a reading rhythm. High `variance` plus `punctuationDelays` for human feel; `loop={false}` and `hideCursorWhenDone` to stop cleanly when finished.",
       },
     },
   },

@@ -136,7 +136,12 @@ import { Typewriter } from "eglador-ui-react-typewriter";
 export function Hero() {
   return (
     <h1 className="text-5xl font-bold">
-      We <Typewriter texts={["build.", "design.", "ship."]} />
+      We{" "}
+      <Typewriter>
+        <Typewriter.Item>build.</Typewriter.Item>
+        <Typewriter.Item>design.</Typewriter.Item>
+        <Typewriter.Item>ship.</Typewriter.Item>
+      </Typewriter>
     </h1>
   );
 }
