@@ -1,4 +1,4 @@
-<img src=".github/eglador-logo.svg" alt="eglador-ui-react-typewriter" width="200" />
+<img src="/eglador-logo.svg" alt="eglador-ui-react-typewriter" width="200" />
 
 # eglador-ui-react-typewriter
 
@@ -14,7 +14,7 @@ A modern typewriter animation for React — smart backspace, natural typing vari
 
 ## Features
 
-- **Compound API** — `<Typewriter>` + `<Typewriter.Item>` (Radix / shadcn pattern), per-item timing overrides
+- **Compound API** — `<Typewriter>` + `<Typewriter.Item>` (Radix / shadcn pattern), per-item `className` / `style` / timing overrides
 - **Multi-string rotation** — cycle through any number of items, with `loop` on/off
 - **Smart backspace** — `deleteMode="smart"` keeps the common prefix with the next string, only retypes the differing suffix (Apple landing-page pattern)
 - **Natural typing rhythm** — `variance` adds ± jitter to every character delay; `punctuationDelays` adds extra pauses after `.` `,` `!` `?` etc.
@@ -100,7 +100,7 @@ Each `Typewriter.Item` can override timing for itself:
 | Export | Purpose |
 |---|---|
 | `Typewriter` | Opinionated compound component — types one or more strings with a configurable cursor |
-| `Typewriter.Item` | Marker subcomponent representing one string — supports per-item timing overrides |
+| `Typewriter.Item` | Marker subcomponent representing one string — supports per-item `className`, `style`, and timing overrides |
 | `TypewriterCursor` | Standalone blinking cursor (line / block / underscore + smooth / hard / none) |
 | `useTypewriter()` | Headless hook — same animation logic, no UI |
 | `ensureCursorStyles()` | Inject cursor blink keyframes into `<head>` (auto-called by the component) |
@@ -117,7 +117,7 @@ Each `Typewriter.Item` can override timing for itself:
 | `variance` | `number` | `0.3` | ± jitter applied to every character delay (0 = steady) |
 | `punctuationDelays` | `Record<string, number>` | `{}` | Extra delay (ms) after typing each character |
 | `deleteMode` | `"backspace" \| "clear" \| "smart"` | `"backspace"` | How to clear text between strings |
-| `loop` | `boolean` | `true` | Cycle through `texts` indefinitely |
+| `loop` | `boolean` | `true` | Cycle through items indefinitely |
 | `autoStart` | `boolean` | `true` | Animate on mount (set `false` to drive via controls) |
 | `respectReducedMotion` | `boolean` | `true` | Honor `prefers-reduced-motion: reduce` |
 | `cursor` | `boolean` | `true` | Show the blinking cursor |
@@ -129,10 +129,10 @@ Each `Typewriter.Item` can override timing for itself:
 | `controlsRef` | `Ref<TypewriterControls>` | — | Imperative controls (`play`, `pause`, `reset`, `skip`) |
 | `className` | `string` | — | Class on the wrapping element |
 | `ariaLabel` | `string \| null` | joined items | Custom screen-reader label, or `null` to disable |
-| `render` | `(state) => ReactNode` | — | Render-prop override; receives `{ text, phase, index, loopCount, cursor }` |
+| `render` | `(state) => ReactNode` | — | Render-prop override; receives `{ text, phase, index, loopCount, cursor, item }` |
 | `onType` | `(text, index) => void` | — | Fires when the current string reaches its full length |
 | `onChange` | `(text, phase) => void` | — | Fires on every text/phase change (high frequency) |
-| `onLoop` | `(loopCount) => void` | — | Fires after each pass through `texts` |
+| `onLoop` | `(loopCount) => void` | — | Fires after each pass through items |
 | `onComplete` | `() => void` | — | Fires after the last string when `loop` is `false` |
 
 ### `Typewriter.Item` props
@@ -140,6 +140,8 @@ Each `Typewriter.Item` can override timing for itself:
 | Prop | Type | Description |
 |---|---|---|
 | `children` | `string` | The text this item types out |
+| `className` | `string` | Class applied to the live text while this item is active |
+| `style` | `React.CSSProperties` | Inline style applied to the live text while this item is active |
 | `typingSpeed` | `number` | Override parent's `typingSpeed` for this item |
 | `deletingSpeed` | `number` | Override parent's `deletingSpeed` for this item |
 | `pauseDuration` | `number` | Override parent's `pauseDuration` for this item |
@@ -184,7 +186,7 @@ interface TypewriterControls {
 </Typewriter>
 ```
 
-### Per-item overrides
+### Per-item timing
 
 ```tsx
 <Typewriter typingSpeed={60} pauseDuration={1500}>
@@ -193,6 +195,20 @@ interface TypewriterControls {
     Slow… and a long pause.
   </Typewriter.Item>
   <Typewriter.Item typingSpeed={20}>And blazing fast!</Typewriter.Item>
+</Typewriter>
+```
+
+### Per-item styling
+
+```tsx
+<Typewriter className="text-3xl font-semibold" deleteMode="smart">
+  <Typewriter.Item className="text-blue-600">Build with React.</Typewriter.Item>
+  <Typewriter.Item className="text-cyan-500">Style with Tailwind.</Typewriter.Item>
+  <Typewriter.Item
+    className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent"
+  >
+    Ship faster.
+  </Typewriter.Item>
 </Typewriter>
 ```
 
@@ -263,14 +279,16 @@ function Hero() {
 
 ```tsx
 <Typewriter
-  render={({ text, cursor }) => (
-    <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+  render={({ text, cursor, item }) => (
+    <h1 className={item?.className} style={item?.style}>
       {text}
       <span className="text-zinc-900">{cursor}</span>
     </h1>
   )}
 >
-  <Typewriter.Item>Compose freely</Typewriter.Item>
+  <Typewriter.Item className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    Compose freely
+  </Typewriter.Item>
 </Typewriter>
 ```
 

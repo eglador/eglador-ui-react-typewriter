@@ -66,7 +66,33 @@ Override props on `Typewriter.Item`: `typingSpeed`, `deletingSpeed`, `pauseDurat
 
 ---
 
-## 4. Natural typing rhythm
+## 4. Per-item styling
+
+Each `Typewriter.Item` accepts its own `className` and `style`. The container `<Typewriter>` keeps its own class for layout / typography; the active item's style is applied to the live text:
+
+```tsx
+<Typewriter className="text-3xl font-semibold" deleteMode="smart">
+  <Typewriter.Item className="text-blue-600">Build with React.</Typewriter.Item>
+  <Typewriter.Item className="text-cyan-500">Style with Tailwind.</Typewriter.Item>
+  <Typewriter.Item
+    className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent"
+  >
+    Ship faster.
+  </Typewriter.Item>
+</Typewriter>
+```
+
+`style` is also supported for inline CSS:
+
+```tsx
+<Typewriter.Item style={{ fontStyle: "italic", letterSpacing: "0.05em" }}>
+  Italic with extra tracking
+</Typewriter.Item>
+```
+
+---
+
+## 5. Natural typing rhythm
 
 Real typing isn't a metronome. Add `variance` for ± jitter and `punctuationDelays` for pauses after `.`, `,`, `!`, `?`:
 
@@ -85,7 +111,7 @@ Real typing isn't a metronome. Add `variance` for ± jitter and `punctuationDela
 
 ---
 
-## 5. Cursor styles
+## 6. Cursor styles
 
 Three geometric variants, three blink modes:
 
@@ -112,7 +138,7 @@ Setting `cursorChar` overrides `cursorStyle` and renders the character with the 
 
 ---
 
-## 6. Lifecycle callbacks
+## 7. Lifecycle callbacks
 
 ```tsx
 <Typewriter
@@ -134,7 +160,7 @@ Setting `cursorChar` overrides `cursorStyle` and renders the character with the 
 
 ---
 
-## 7. Imperative controls — play / pause / skip / reset
+## 8. Imperative controls — play / pause / skip / reset
 
 ```tsx
 import { Typewriter, type TypewriterControls } from "eglador-ui-react-typewriter";
@@ -156,7 +182,7 @@ For one-shot animations driven entirely by buttons, set `autoStart={false}` and 
 
 ---
 
-## 8. Render-prop API
+## 9. Render-prop API
 
 Pass a `render` prop to take full control of the surrounding markup. Items still come from `Typewriter.Item` children:
 
@@ -177,7 +203,7 @@ When `render` is provided, the default `<span>` wrapper is skipped — you take 
 
 ---
 
-## 9. Headless `useTypewriter` hook
+## 10. Headless `useTypewriter` hook
 
 For fully custom UIs (e.g. typing into an SVG, integrating with another animation library), the hook accepts items as an array — strings or objects with overrides:
 
@@ -210,7 +236,7 @@ The hook returns `{ text, phase, index, loopCount, isPaused, isDone, controls }`
 
 ---
 
-## 10. Reduced motion
+## 11. Reduced motion
 
 By default, the component honors `prefers-reduced-motion: reduce` — the last item is rendered instantly, no cursor. Disable with:
 
@@ -224,7 +250,7 @@ Recommended to leave on for accessibility.
 
 ---
 
-## 11. Accessibility
+## 12. Accessibility
 
 - Live text is rendered with `aria-hidden="true"` so screen readers don't announce every keystroke
 - The wrapping element has `role="text"` and `aria-label="<all items joined>"` so the full content is conveyed once
@@ -267,7 +293,7 @@ export function Hero() {
 ## Next Steps
 
 - Open the **Typewriter/Playground** story → toggle every option live in the Controls panel
-- Browse the preset stories: **SmartBackspace**, **PerItemOverrides**, **NaturalTyping**, **HardBlinkBlockCursor**, **CustomCursorChar**, **RenderProp**, **NonLooping**, **SingleString**, **Paragraph**
+- Browse the preset stories: **SmartBackspace**, **PerItemTiming**, **PerItemStyling**, **NaturalTyping**, **HardBlinkBlockCursor**, **CustomCursorChar**, **RenderProp**, **NonLooping**, **SingleString**, **Paragraph**
 - Click **Show code** in any story → copy-paste-ready usage examples
 
 ---

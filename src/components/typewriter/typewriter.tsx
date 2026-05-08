@@ -15,41 +15,25 @@ import type {
 } from "./types";
 
 interface RenderState {
-  /** Currently displayed text. */
   text: string;
-  /** Current animation phase. */
   phase: TypewriterPhase;
-  /** Active item index. */
   index: number;
-  /** Loop iteration count. */
   loopCount: number;
-  /** Pre-built cursor element using current cursor props. */
   cursor: React.ReactNode;
+  item: TypewriterItem | undefined;
 }
-
-// ---------- Item subcomponent ----------
 
 export interface TypewriterItemProps
   extends Omit<TypewriterItem, "text"> {
-  /** Plain string content — the text this item types out. */
   children: string;
 }
 
-/**
- * Marker component representing a single string in the sequence.
- * Renders nothing — its props are extracted by the parent
- * `<Typewriter>` to build the items list.
- *
- * @example
- * <Typewriter typingSpeed={60}>
- *   <Typewriter.Item>Build with React.</Typewriter.Item>
- *   <Typewriter.Item typingSpeed={120}>Slow this one down.</Typewriter.Item>
- * </Typewriter>
- */
 const TypewriterItemComponent: React.FC<TypewriterItemProps> = () => null;
 TypewriterItemComponent.displayName = "Typewriter.Item";
 
-// ---------- Children -> items extraction ----------
+declare const process: { env: { NODE_ENV?: string } } | undefined;
+const isDevelopment =
+  typeof process !== "undefined" && process?.env?.NODE_ENV !== "production";
 
 function extractItems(children: React.ReactNode): TypewriterItem[] {
   if (children == null) return [];
@@ -67,65 +51,47 @@ function extractItems(children: React.ReactNode): TypewriterItem[] {
       out.push({ text: String(child) });
       return;
     }
-    if (React.isValidElement(child) && child.type === TypewriterItemComponent) {
+    if (
+      React.isValidElement(child) &&
+      child.type === TypewriterItemComponent
+    ) {
       const props = child.props as TypewriterItemProps;
       out.push({
         text: props.children,
         typingSpeed: props.typingSpeed,
         deletingSpeed: props.deletingSpeed,
         pauseDuration: props.pauseDuration,
+        className: props.className,
+        style: props.style,
       });
+      return;
     }
-    // Other children (JSX elements that aren't Item, fragments, etc.) are
-    // intentionally ignored — they shouldn't appear under <Typewriter>.
+    if (isDevelopment) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[Typewriter] Ignored unsupported child. Only `<Typewriter.Item>`, " +
+          "plain strings, and numbers are accepted. For custom rendering " +
+          "use the `render` prop.",
+      );
+    }
   });
   return out;
 }
 
-// ---------- Root component ----------
-
 export interface TypewriterProps
   extends TypewriterTimingOptions,
     TypewriterCallbacks {
-  /**
-   * Items to type. Three accepted forms:
-   *
-   * - `<Typewriter.Item>` elements (compound pattern, supports per-item overrides)
-   * - A plain string (shorthand for a single item)
-   * - Multiple plain strings (shorthand for multiple items)
-   *
-   * For render-prop control, use the `render` prop instead.
-   */
   children?: React.ReactNode;
-  /**
-   * Render-prop override. Receives live state plus a pre-built cursor
-   * node. When provided, the default `<span>` wrapper is skipped and
-   * the consumer is fully responsible for rendering. Pair with
-   * `<Typewriter.Item>` children to supply the items list.
-   */
   render?: (state: RenderState) => React.ReactNode;
-  /** Show the blinking cursor (default `true`). */
   cursor?: boolean;
-  /** Visual style of the cursor — ignored if `cursorChar` is set
-   *  (default `"line"`). */
   cursorStyle?: CursorStyle;
-  /** Cursor blink behavior (default `"smooth"`). */
   cursorBlink?: CursorBlink;
-  /** Override the geometric cursor with a custom character
-   *  (e.g. `"▌"`, `"_"`, `"|"`). */
   cursorChar?: string;
-  /** Additional className for the cursor element. */
   cursorClassName?: string;
-  /** Hide the cursor when the animation finishes (default `false`).
-   *  Only meaningful when `loop` is `false`. */
   hideCursorWhenDone?: boolean;
-  /** Imperative controls — receives `play / pause / reset / skip`. */
   controlsRef?: React.Ref<TypewriterControls>;
-  /** Element class. */
   className?: string;
-  /** Accessible label announced by screen readers. Defaults to joining
-   *  every item's text so the full content is conveyed at once instead
-   *  of character-by-character. Pass `null` to disable. */
+  style?: React.CSSProperties;
   ariaLabel?: string | null;
 }
 
@@ -142,6 +108,7 @@ const TypewriterRoot = React.forwardRef<HTMLSpanElement, TypewriterProps>(
       hideCursorWhenDone = false,
       controlsRef,
       className,
+      style,
       ariaLabel,
       ...timingAndCallbacks
     },
@@ -159,6 +126,8 @@ const TypewriterRoot = React.forwardRef<HTMLSpanElement, TypewriterProps>(
 
     React.useImperativeHandle(controlsRef, () => controls, [controls]);
 
+    const activeItem = items[index];
+
     const showCursor =
       cursor && !(hideCursorWhenDone && phase === "done");
 
@@ -172,7 +141,14 @@ const TypewriterRoot = React.forwardRef<HTMLSpanElement, TypewriterProps>(
     ) : null;
 
     if (render) {
-      return <>{render({ text, phase, index, loopCount, cursor: cursorNode })}</>;
+      return render({
+        text,
+        phase,
+        index,
+        loopCount,
+        cursor: cursorNode,
+        item: activeItem,
+      });
     }
 
     const computedAriaLabel =
@@ -186,10 +162,15 @@ const TypewriterRoot = React.forwardRef<HTMLSpanElement, TypewriterProps>(
         role="text"
         aria-label={computedAriaLabel}
         className={cn("inline-block", className)}
+        style={style}
       >
-        {/* Visible text is hidden from screen readers — they get the full
-            label instead, avoiding character-by-character announcements. */}
-        <span aria-hidden="true">{text}</span>
+        <span
+          aria-hidden="true"
+          className={activeItem?.className}
+          style={activeItem?.style}
+        >
+          {text}
+        </span>
         {cursorNode}
       </span>
     );
@@ -198,22 +179,6 @@ const TypewriterRoot = React.forwardRef<HTMLSpanElement, TypewriterProps>(
 
 TypewriterRoot.displayName = "Typewriter";
 
-/**
- * Animated typewriter — types out one or more strings, optionally
- * looping with smart backspace, natural typing variance, punctuation
- * pauses, and a configurable cursor.
- *
- * Items are passed via the compound `<Typewriter.Item>` API:
- *
- * @example
- * <Typewriter deleteMode="smart" className="text-3xl font-semibold">
- *   <Typewriter.Item>Build with React.</Typewriter.Item>
- *   <Typewriter.Item>Style with Tailwind.</Typewriter.Item>
- *   <Typewriter.Item>Ship faster.</Typewriter.Item>
- * </Typewriter>
- *
- * Drop down to `useTypewriter()` for fully custom rendering.
- */
 export const Typewriter = Object.assign(TypewriterRoot, {
   Item: TypewriterItemComponent,
 });

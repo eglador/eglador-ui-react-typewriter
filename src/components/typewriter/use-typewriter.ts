@@ -48,8 +48,6 @@ function usePrefersReducedMotion(enabled: boolean): boolean {
   return prefers;
 }
 
-/** Coerce string shorthand into the object form so the rest of the
- *  hook can treat every item uniformly. */
 function normalizeItems(
   raw: ReadonlyArray<string | TypewriterItem>,
 ): TypewriterItem[] {
@@ -59,27 +57,15 @@ function normalizeItems(
 }
 
 export interface UseTypewriterReturn {
-  /** Currently displayed text. */
   text: string;
-  /** Current animation phase. */
   phase: TypewriterPhase;
-  /** Index of the active item. */
   index: number;
-  /** Number of completed cycles through the items list. */
   loopCount: number;
-  /** Whether `pause()` was called and `play()` hasn't resumed yet. */
   isPaused: boolean;
-  /** Convenience flag — `phase === "done"`. */
   isDone: boolean;
-  /** Imperative control surface. */
   controls: TypewriterControls;
 }
 
-/**
- * Headless typewriter — produces the live text and phase, no UI.
- * Compose your own rendering on top, or use `<Typewriter>` for the
- * default presentation.
- */
 export function useTypewriter(
   options: UseTypewriterOptions,
 ): UseTypewriterReturn {
@@ -114,12 +100,9 @@ export function useTypewriter(
   const [loopCount, setLoopCount] = React.useState(0);
   const [isPaused, setIsPaused] = React.useState(false);
 
-  // Stable refs for callbacks so we don't re-run the tick effect on every
-  // parent render. Always read the latest version via `.current`.
   const cbRef = React.useRef({ onType, onChange, onLoop, onComplete });
   cbRef.current = { onType, onChange, onLoop, onComplete };
 
-  // Reduced-motion shortcut — show the last item's text and freeze.
   React.useEffect(() => {
     if (!reducedMotion) return;
     const last = list[list.length - 1]?.text ?? "";
@@ -127,7 +110,6 @@ export function useTypewriter(
     setPhase("done");
   }, [reducedMotion, list]);
 
-  // Auto-start — leave `idle` after `startDelay`. Re-armed by `reset()`.
   React.useEffect(() => {
     if (reducedMotion) return;
     if (phase !== "idle" || !autoStart || isPaused) return;
@@ -139,14 +121,11 @@ export function useTypewriter(
     return () => window.clearTimeout(id);
   }, [phase, startDelay, autoStart, isPaused, reducedMotion]);
 
-  // Emit onChange for every text/phase delta. Skipped under reduced motion
-  // where the animation is frozen.
   React.useEffect(() => {
     if (reducedMotion) return;
     cbRef.current.onChange?.(text, phase);
   }, [text, phase, reducedMotion]);
 
-  // Main tick — schedules the next character / phase transition.
   React.useEffect(() => {
     if (reducedMotion || isPaused) return;
     if (phase === "idle" || phase === "done") return;
@@ -155,7 +134,6 @@ export function useTypewriter(
     const currentItem = list[index] ?? { text: "" };
     const current = currentItem.text;
 
-    // Per-item overrides fall back to the parent-level values.
     const itemTypingSpeed = currentItem.typingSpeed ?? typingSpeed;
     const itemDeletingSpeed = currentItem.deletingSpeed ?? deletingSpeed;
     const itemPauseDuration = currentItem.pauseDuration ?? pauseDuration;
@@ -173,7 +151,6 @@ export function useTypewriter(
         );
         return () => window.clearTimeout(id);
       }
-      // Reached full length — fire callback, transition.
       cbRef.current.onType?.(current, index);
       if (!loop && index === list.length - 1) {
         setPhase("done");
@@ -245,7 +222,6 @@ export function useTypewriter(
     punctuationDelays,
   ]);
 
-  // Imperative controls. Memoized so consumers can use them in deps.
   const controls = React.useMemo<TypewriterControls>(
     () => ({
       play: () => setIsPaused(false),

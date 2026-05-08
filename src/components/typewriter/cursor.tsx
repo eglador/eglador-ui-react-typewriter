@@ -7,19 +7,11 @@ import { ensureCursorStyles } from "./cursor-styles";
 
 export interface TypewriterCursorProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
-  /** Visual variant of the cursor (default `"line"`). */
   variant?: CursorStyle;
-  /** Blink behavior (default `"smooth"`). */
   blink?: CursorBlink;
-  /** Override the default geometric cursor with a custom character
-   *  (e.g. `"▌"`, `"_"`, `"|"`). When set, the `variant` prop is ignored. */
   char?: string;
 }
 
-/**
- * Standalone blinking cursor — exposed for use inside the `<Typewriter>`
- * render-prop API or as a static UI element.
- */
 export function TypewriterCursor({
   variant = "line",
   blink = "smooth",

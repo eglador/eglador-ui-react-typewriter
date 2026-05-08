@@ -47,13 +47,18 @@ import { Typewriter } from "eglador-ui-react-typewriter";
 </Typewriter>
 ```
 
-Each `Typewriter.Item` may also override timing for itself:
+Each `Typewriter.Item` accepts its own `className` and `style`, plus per-item timing overrides:
 
 ```tsx
-<Typewriter typingSpeed={60}>
-  <Typewriter.Item>Normal speed.</Typewriter.Item>
-  <Typewriter.Item typingSpeed={150} pauseDuration={3000}>
-    Slow this one down.
+<Typewriter className="text-3xl font-semibold" deleteMode="smart">
+  <Typewriter.Item className="text-blue-600">Build with React.</Typewriter.Item>
+  <Typewriter.Item className="text-cyan-500">Style with Tailwind.</Typewriter.Item>
+  <Typewriter.Item
+    className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent"
+    typingSpeed={120}
+    pauseDuration={3000}
+  >
+    Ship faster.
   </Typewriter.Item>
 </Typewriter>
 ```
@@ -76,7 +81,7 @@ Each `Typewriter.Item` may also override timing for itself:
     </tr>
     <tr>
       <td><code>Typewriter.Item</code></td>
-      <td>Marker subcomponent representing one string in the sequence — supports per-item timing overrides</td>
+      <td>Marker subcomponent representing one string — supports per-item <code>className</code>, <code>style</code>, and timing overrides</td>
     </tr>
     <tr>
       <td><code>TypewriterCursor</code></td>
@@ -97,7 +102,7 @@ Each `Typewriter.Item` may also override timing for itself:
 
 ## Features
 
-- **Compound API** — `<Typewriter>` + `<Typewriter.Item>` (Radix / shadcn pattern), per-item timing overrides
+- **Compound API** — `<Typewriter>` + `<Typewriter.Item>` (Radix / shadcn pattern), per-item `className` / `style` / timing overrides
 - **Multi-string rotation** — cycle through any number of items, with `loop` on/off
 - **Smart backspace** — `deleteMode="smart"` keeps the common prefix with the next string and only retypes the differing suffix (Apple landing-page pattern)
 - **Natural typing** — `variance` adds ± jitter to every character delay so the rhythm feels human; `punctuationDelays` adds extra pauses after `.` `,` `!` `?` etc.
