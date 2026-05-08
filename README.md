@@ -1,4 +1,4 @@
-<img src="/eglador-logo.svg" alt="eglador-ui-react-typewriter" width="200" />
+<img src=".github/eglador-logo.svg" alt="eglador-ui-react-typewriter" width="200" />
 
 # eglador-ui-react-typewriter
 
