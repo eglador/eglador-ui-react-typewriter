@@ -147,11 +147,6 @@ const meta: Meta<PlaygroundArgs> = {
         component:
           "Master playground for live-testing every option from the Controls panel. Items are rendered via the compound `<Typewriter.Item>` API; the `Show code` panel mirrors the JSX you would write.",
       },
-      source: {
-        type: "code",
-        language: "tsx",
-        transform: playgroundCodeTransform,
-      },
     },
   },
   args: {
@@ -350,6 +345,15 @@ function PlaygroundDemo(args: PlaygroundArgs) {
 }
 
 export const Playground: StoryObj<PlaygroundArgs> = {
+  parameters: {
+    docs: {
+      source: {
+        type: "code",
+        language: "tsx",
+        transform: playgroundCodeTransform,
+      },
+    },
+  },
   render: (args) => <PlaygroundDemo {...args} />,
 };
 
@@ -359,6 +363,14 @@ export const SmartBackspace: StoryObj = {
       description: {
         story:
           "`deleteMode=\"smart\"` keeps the longest common prefix between consecutive items, deleting only the differing suffix.",
+      },
+      source: {
+        language: "tsx",
+        code: `<Typewriter deleteMode="smart" className="text-3xl font-semibold text-zinc-900">
+  <Typewriter.Item>I love React</Typewriter.Item>
+  <Typewriter.Item>I love Tailwind</Typewriter.Item>
+  <Typewriter.Item>I love TypeScript</Typewriter.Item>
+</Typewriter>`,
       },
     },
   },
@@ -377,6 +389,20 @@ export const PerItemTiming: StoryObj = {
       description: {
         story:
           "Every `Typewriter.Item` may override `typingSpeed`, `deletingSpeed`, and `pauseDuration` for itself, falling back to the parent value otherwise.",
+      },
+      source: {
+        language: "tsx",
+        code: `<Typewriter
+  typingSpeed={60}
+  pauseDuration={1500}
+  className="text-2xl text-zinc-800"
+>
+  <Typewriter.Item>Normal speed.</Typewriter.Item>
+  <Typewriter.Item typingSpeed={150} pauseDuration={3000}>
+    Slow… and a long pause.
+  </Typewriter.Item>
+  <Typewriter.Item typingSpeed={20}>And blazing fast!</Typewriter.Item>
+</Typewriter>`,
       },
     },
   },
@@ -401,6 +427,16 @@ export const PerItemStyling: StoryObj = {
       description: {
         story:
           "Every `Typewriter.Item` accepts its own `className` and `style` — the active item's styling is applied to the live text. The container `<Typewriter>` keeps its own class for layout / typography.",
+      },
+      source: {
+        language: "tsx",
+        code: `<Typewriter deleteMode="smart" className="text-3xl font-semibold">
+  <Typewriter.Item className="text-blue-600">Build with React.</Typewriter.Item>
+  <Typewriter.Item className="text-cyan-500">Style with Tailwind.</Typewriter.Item>
+  <Typewriter.Item className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+    Ship faster.
+  </Typewriter.Item>
+</Typewriter>`,
       },
     },
   },
@@ -429,6 +465,18 @@ export const NaturalTyping: StoryObj = {
         story:
           "High `variance` plus `punctuationDelays` produce a natural, human-like typing rhythm.",
       },
+      source: {
+        language: "tsx",
+        code: `<Typewriter
+  typingSpeed={70}
+  variance={0.5}
+  punctuationDelays={{ ".": 600, "!": 600, "?": 600, ",": 250, ";": 350, ":": 350 }}
+  className="text-2xl text-zinc-800"
+>
+  <Typewriter.Item>Hello, world. This feels natural, doesn't it?</Typewriter.Item>
+  <Typewriter.Item>Variance + punctuation pauses make it real.</Typewriter.Item>
+</Typewriter>`,
+      },
     },
   },
   render: () => (
@@ -455,6 +503,17 @@ export const HardBlinkBlockCursor: StoryObj = {
         story:
           "Terminal feel — block cursor + hard blink + monospace font.",
       },
+      source: {
+        language: "tsx",
+        code: `<Typewriter
+  cursorStyle="block"
+  cursorBlink="hard"
+  loop={false}
+  className="text-xl font-mono text-emerald-500 bg-zinc-900 p-4 rounded-lg"
+>
+  <Typewriter.Item>$ npm install eglador-ui-react-typewriter</Typewriter.Item>
+</Typewriter>`,
+      },
     },
   },
   render: () => (
@@ -475,6 +534,13 @@ export const CustomCursorChar: StoryObj = {
       description: {
         story: "Use any character as the cursor (`▌`).",
       },
+      source: {
+        language: "tsx",
+        code: `<Typewriter cursorChar="▌" className="text-2xl font-semibold text-blue-600">
+  <Typewriter.Item>Custom cursor character</Typewriter.Item>
+  <Typewriter.Item>Anything you like</Typewriter.Item>
+</Typewriter>`,
+      },
     },
   },
   render: () => (
@@ -491,6 +557,30 @@ export const RenderProp: StoryObj = {
       description: {
         story:
           "Render-prop API — supply `render` to take full control of the wrapping markup. Items are still passed via `<Typewriter.Item>`. The render function also receives the active `item` so you can read its `className` / `style`.",
+      },
+      source: {
+        language: "tsx",
+        code: `<Typewriter
+  render={({ text, cursor, phase, item }) => (
+    <h1
+      className={\`text-4xl font-bold \${item?.className ?? ""}\`}
+      style={item?.style}
+    >
+      <span aria-hidden="true">{text}</span>
+      <span className="text-zinc-900">{cursor}</span>
+      <span className="block mt-2 text-xs font-normal text-zinc-500">
+        phase: {phase}
+      </span>
+    </h1>
+  )}
+>
+  <Typewriter.Item className="text-blue-600">
+    Wrap me in any element
+  </Typewriter.Item>
+  <Typewriter.Item className="text-emerald-600">
+    Compose freely
+  </Typewriter.Item>
+</Typewriter>`,
       },
     },
   },
@@ -526,6 +616,16 @@ export const NonLooping: StoryObj = {
         story:
           "`loop={false}` plus `hideCursorWhenDone` — single pass animation that ends and removes the cursor.",
       },
+      source: {
+        language: "tsx",
+        code: `<Typewriter
+  loop={false}
+  hideCursorWhenDone
+  className="text-2xl text-zinc-800"
+>
+  <Typewriter.Item>This types once, then stops.</Typewriter.Item>
+</Typewriter>`,
+      },
     },
   },
   render: () => (
@@ -546,6 +646,12 @@ export const SingleString: StoryObj = {
         story:
           "Shorthand for a single item — pass a plain string child instead of `<Typewriter.Item>`.",
       },
+      source: {
+        language: "tsx",
+        code: `<Typewriter className="text-2xl font-semibold text-zinc-900">
+  Hello, world.
+</Typewriter>`,
+      },
     },
   },
   render: () => (
@@ -561,6 +667,23 @@ export const Paragraph: StoryObj = {
       description: {
         story:
           "Long-form prose — Lorem Ipsum typed at a reading rhythm. High `variance` plus `punctuationDelays` for human feel; `loop={false}` and `hideCursorWhenDone` to stop cleanly when finished.",
+      },
+      source: {
+        language: "tsx",
+        code: `<div className="max-w-2xl">
+  <Typewriter
+    typingSpeed={35}
+    variance={0.5}
+    punctuationDelays={{ ".": 600, "!": 600, "?": 600, ",": 250, ";": 350, ":": 350 }}
+    loop={false}
+    hideCursorWhenDone
+    className="text-base leading-relaxed text-zinc-700 [&>span]:[white-space:pre-wrap]"
+  >
+    <Typewriter.Item>
+      Lorem Ipsum is simply dummy text of the printing and typesetting industry…
+    </Typewriter.Item>
+  </Typewriter>
+</div>`,
       },
     },
   },
