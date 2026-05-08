@@ -1,0 +1,163 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Installation" />
+
+# Installation
+
+Package installation, peer dependencies, and Tailwind v4 integration.
+
+---
+
+## 1. Install the package
+
+```bash
+npm install eglador-ui-react-typewriter
+```
+
+```bash
+yarn add eglador-ui-react-typewriter
+```
+
+```bash
+pnpm add eglador-ui-react-typewriter
+```
+
+---
+
+## 2. Peer dependencies
+
+The following peer dependencies must be present in your project:
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Package</th>
+      <th align="left">Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>react</code></td>
+      <td><code>{">= 18"}</code></td>
+    </tr>
+    <tr>
+      <td><code>react-dom</code></td>
+      <td><code>{">= 18"}</code></td>
+    </tr>
+    <tr>
+      <td><code>tailwindcss</code></td>
+      <td><code>^4.0.0</code></td>
+    </tr>
+  </tbody>
+</table>
+
+These are typically already present in modern React projects (Next.js, Vite, Remix).
+
+> **Zero runtime dependencies.** `clsx` and `tailwind-merge` are pre-bundled — nothing else is pulled into your app.
+
+---
+
+## 3. Add `@source` for Tailwind v4
+
+Tailwind needs to scan classes inside the package. Add the `@source` directive to your global stylesheet:
+
+```css
+@import "tailwindcss";
+
+@source "../node_modules/eglador-ui-react-typewriter";
+```
+
+The `@source` path varies based on your CSS file location:
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Framework</th>
+      <th align="left">CSS file</th>
+      <th align="left"><code>@source</code> path</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Next.js (App Router)</td>
+      <td><code>app/globals.css</code></td>
+      <td><code>../node_modules/eglador-ui-react-typewriter</code></td>
+    </tr>
+    <tr>
+      <td>Next.js (<code>src/</code>)</td>
+      <td><code>src/app/globals.css</code></td>
+      <td><code>../../node_modules/eglador-ui-react-typewriter</code></td>
+    </tr>
+    <tr>
+      <td>Vite + React</td>
+      <td><code>src/index.css</code></td>
+      <td><code>../node_modules/eglador-ui-react-typewriter</code></td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## 4. Cursor blink keyframes
+
+The cursor's blink animation uses two CSS keyframes (`eglador-tw-blink-smooth`, `eglador-tw-blink-hard`). They're injected into `<head>` automatically the first time the component mounts — **no extra CSS import needed**.
+
+If you render the cursor in a portal or shadow DOM and need to inject the styles manually:
+
+```tsx
+import { ensureCursorStyles } from "eglador-ui-react-typewriter";
+
+ensureCursorStyles();
+```
+
+Calling more than once is a no-op.
+
+---
+
+## 5. Server components note (Next.js)
+
+The component uses `useState` / `useEffect` and is marked `"use client"`. Render it inside a client component:
+
+```tsx
+// app/page.tsx
+import { Hero } from "./hero";
+
+export default function Page() {
+  return <Hero />;
+}
+```
+
+```tsx
+// app/hero.tsx
+"use client";
+
+import { Typewriter } from "eglador-ui-react-typewriter";
+
+export function Hero() {
+  return (
+    <h1 className="text-5xl font-bold">
+      We <Typewriter texts={["build.", "design.", "ship."]} />
+    </h1>
+  );
+}
+```
+
+> **SSR rendering** — on the server the component renders empty (no animation possible). The animation begins on client mount. If you need static fallback content, use the render-prop API and check `phase === "idle"`.
+
+---
+
+## 6. Verify
+
+Import a component — TypeScript should autocomplete:
+
+```tsx
+import { Typewriter, useTypewriter } from "eglador-ui-react-typewriter";
+```
+
+Continue with **Getting Started** to build your first animation.
+
+---
+
+## Issues?
+
+Open an [issue on GitHub](https://github.com/eglador/eglador-ui-react-typewriter/issues).

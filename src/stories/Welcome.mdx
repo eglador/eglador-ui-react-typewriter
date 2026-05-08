@@ -1,0 +1,125 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Welcome" />
+
+<img src="/eglador-logo.svg" alt="eglador-ui-react-typewriter" width="160" style={{ marginBottom: 24 }} />
+
+# eglador-ui-react-typewriter
+
+<div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
+  <img src="https://img.shields.io/npm/v/eglador-ui-react-typewriter?style=flat-square&color=blue" alt="npm version" />
+  <img src="https://img.shields.io/npm/dm/eglador-ui-react-typewriter?style=flat-square&color=green" alt="npm downloads" />
+  <img src="https://img.shields.io/npm/l/eglador-ui-react-typewriter?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/zero%20deps-runtime-22C55E?style=flat-square" alt="zero runtime deps" />
+  <img src="https://img.shields.io/badge/tailwindcss-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="tailwind v4" />
+  <img src="https://img.shields.io/badge/react-%3E%3D18-61DAFB?style=flat-square&logo=react&logoColor=white" alt="react >= 18" />
+  <img src="https://img.shields.io/badge/typescript-ready-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="typescript" />
+</div>
+
+A modern typewriter animation for React — smart backspace, natural typing variance, punctuation pauses, imperative controls, and a fully headless `useTypewriter` hook. Styled with **Tailwind CSS v4**.
+
+---
+
+## Installation
+
+```bash
+npm install eglador-ui-react-typewriter
+```
+
+## Setup
+
+Add the following to your global stylesheet (e.g. `app/globals.css`):
+
+```css
+@import "tailwindcss";
+@source "../node_modules/eglador-ui-react-typewriter";
+```
+
+## Quick Start
+
+```tsx
+import { Typewriter } from "eglador-ui-react-typewriter";
+
+<Typewriter deleteMode="smart" className="text-3xl font-semibold">
+  <Typewriter.Item>Build with React.</Typewriter.Item>
+  <Typewriter.Item>Style with Tailwind.</Typewriter.Item>
+  <Typewriter.Item>Ship faster.</Typewriter.Item>
+</Typewriter>
+```
+
+Each `Typewriter.Item` may also override timing for itself:
+
+```tsx
+<Typewriter typingSpeed={60}>
+  <Typewriter.Item>Normal speed.</Typewriter.Item>
+  <Typewriter.Item typingSpeed={150} pauseDuration={3000}>
+    Slow this one down.
+  </Typewriter.Item>
+</Typewriter>
+```
+
+---
+
+## Exports
+
+<table>
+  <thead>
+    <tr>
+      <th align="left">Export</th>
+      <th align="left">Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>Typewriter</code></td>
+      <td>Opinionated compound component — types out one or more strings with a configurable cursor</td>
+    </tr>
+    <tr>
+      <td><code>Typewriter.Item</code></td>
+      <td>Marker subcomponent representing one string in the sequence — supports per-item timing overrides</td>
+    </tr>
+    <tr>
+      <td><code>TypewriterCursor</code></td>
+      <td>Standalone blinking cursor (line / block / underscore + smooth / hard / none)</td>
+    </tr>
+    <tr>
+      <td><code>useTypewriter()</code></td>
+      <td>Headless hook — same animation logic, no UI. Build your own rendering.</td>
+    </tr>
+    <tr>
+      <td><code>ensureCursorStyles()</code></td>
+      <td>Inject blink keyframes into <code>&lt;head&gt;</code> manually (auto-called by the component)</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+## Features
+
+- **Compound API** — `<Typewriter>` + `<Typewriter.Item>` (Radix / shadcn pattern), per-item timing overrides
+- **Multi-string rotation** — cycle through any number of items, with `loop` on/off
+- **Smart backspace** — `deleteMode="smart"` keeps the common prefix with the next string and only retypes the differing suffix (Apple landing-page pattern)
+- **Natural typing** — `variance` adds ± jitter to every character delay so the rhythm feels human; `punctuationDelays` adds extra pauses after `.` `,` `!` `?` etc.
+- **Imperative controls** — `play()`, `pause()`, `reset()`, `skip()` exposed via `controlsRef`
+- **Lifecycle callbacks** — `onType`, `onChange`, `onLoop`, `onComplete`
+- **Cursor styles** — `line` / `block` / `underscore` with `smooth` / `hard` / `none` blink, or override with any custom character
+- **Render-prop API** — full control over the wrapping element and surrounding markup
+- **Headless hook** — `useTypewriter()` for completely custom UIs
+- **Accessible** — `role="text"` + `aria-label` joins all strings so screen readers announce the full content once instead of character-by-character
+- **Reduced-motion friendly** — honors `prefers-reduced-motion: reduce` by rendering the final string instantly with no cursor
+- **SSR safe** — renders empty on the server, animation starts on client mount
+- **Zero runtime dependencies** — only `clsx` + `tailwind-merge`, both pre-bundled
+
+---
+
+## Links
+
+- [GitHub](https://github.com/eglador/eglador-ui-react-typewriter)
+- [npm](https://www.npmjs.com/package/eglador-ui-react-typewriter)
+
+---
+
+**Author:** Kenan Gündoğan — [github.com/kenangundogan](https://github.com/kenangundogan)
+
+Maintained under [Eglador](https://github.com/eglador).

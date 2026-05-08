@@ -1,0 +1,275 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Getting Started" />
+
+# Getting Started
+
+Build your first typewriter animation in a few lines.
+
+> If you haven't installed the package yet, see the **Installation** page.
+
+---
+
+## 1. Single string
+
+```tsx
+import { Typewriter } from "eglador-ui-react-typewriter";
+
+<Typewriter className="text-2xl font-semibold">Hello, world.</Typewriter>
+```
+
+A plain string child is treated as a single item — the simplest possible usage.
+
+---
+
+## 2. Multi-string with the compound API
+
+For multiple strings, use the **`<Typewriter.Item>`** subcomponent (Radix / shadcn compound pattern):
+
+```tsx
+<Typewriter deleteMode="smart" className="text-3xl font-semibold">
+  <Typewriter.Item>I love React</Typewriter.Item>
+  <Typewriter.Item>I love Tailwind</Typewriter.Item>
+  <Typewriter.Item>I love TypeScript</Typewriter.Item>
+</Typewriter>
+```
+
+`deleteMode="smart"` keeps the longest common prefix between consecutive items, deleting only the differing suffix. So `"I love React"` → `"I love Tailwind"` only retypes `Tailwind` instead of clearing `"I love "`.
+
+The other modes:
+
+```ts
+type DeleteMode = "backspace" | "clear" | "smart";
+```
+
+- `backspace` (default) — delete one character at a time
+- `clear` — wipe instantly between items
+- `smart` — preserve common prefix
+
+---
+
+## 3. Per-item timing overrides
+
+Every `Typewriter.Item` can override its parent's timing for that item only — slower, faster, longer pauses:
+
+```tsx
+<Typewriter typingSpeed={60} pauseDuration={1500}>
+  <Typewriter.Item>Normal speed.</Typewriter.Item>
+  <Typewriter.Item typingSpeed={150} pauseDuration={3000}>
+    Slow… and a long pause.
+  </Typewriter.Item>
+  <Typewriter.Item typingSpeed={20}>And blazing fast!</Typewriter.Item>
+</Typewriter>
+```
+
+Override props on `Typewriter.Item`: `typingSpeed`, `deletingSpeed`, `pauseDuration`.
+
+---
+
+## 4. Natural typing rhythm
+
+Real typing isn't a metronome. Add `variance` for ± jitter and `punctuationDelays` for pauses after `.`, `,`, `!`, `?`:
+
+```tsx
+<Typewriter
+  typingSpeed={70}
+  variance={0.4}
+  punctuationDelays={{ ".": 600, "!": 600, "?": 600, ",": 250 }}
+>
+  <Typewriter.Item>Hello, world. This feels natural, doesn't it?</Typewriter.Item>
+</Typewriter>
+```
+
+- `variance={0}` — perfectly steady (default `0.3` = ±30%)
+- `punctuationDelays={{}}` — no extra pauses (default empty)
+
+---
+
+## 5. Cursor styles
+
+Three geometric variants, three blink modes:
+
+```tsx
+<Typewriter cursorStyle="block" cursorBlink="hard">
+  <Typewriter.Item>Block + hard blink</Typewriter.Item>
+</Typewriter>
+
+<Typewriter cursorStyle="underscore">
+  <Typewriter.Item>Underscore</Typewriter.Item>
+</Typewriter>
+
+<Typewriter cursorChar="▌">
+  <Typewriter.Item>Custom character</Typewriter.Item>
+</Typewriter>
+```
+
+```ts
+type CursorStyle = "line" | "block" | "underscore";
+type CursorBlink = "smooth" | "hard" | "none";
+```
+
+Setting `cursorChar` overrides `cursorStyle` and renders the character with the chosen blink.
+
+---
+
+## 6. Lifecycle callbacks
+
+```tsx
+<Typewriter
+  onType={(text, index) => console.log("typed:", text, "at index", index)}
+  onLoop={(count) => console.log("completed loop", count)}
+  onChange={(text, phase) => {
+    /* fires on every character — use sparingly */
+  }}
+>
+  <Typewriter.Item>First</Typewriter.Item>
+  <Typewriter.Item>Second</Typewriter.Item>
+</Typewriter>
+```
+
+- `onType` — fires once per item when fully typed
+- `onChange` — fires on every text/phase delta (high frequency)
+- `onLoop` — fires after each pass through items (when `loop` is `true`)
+- `onComplete` — fires after the last item when `loop` is `false`
+
+---
+
+## 7. Imperative controls — play / pause / skip / reset
+
+```tsx
+import { Typewriter, type TypewriterControls } from "eglador-ui-react-typewriter";
+
+const controls = useRef<TypewriterControls>(null);
+
+<Typewriter controlsRef={controls}>
+  <Typewriter.Item>Animated</Typewriter.Item>
+  <Typewriter.Item>On demand</Typewriter.Item>
+</Typewriter>
+
+<button onClick={() => controls.current?.pause()}>Pause</button>
+<button onClick={() => controls.current?.play()}>Play</button>
+<button onClick={() => controls.current?.skip()}>Skip</button>
+<button onClick={() => controls.current?.reset()}>Reset</button>
+```
+
+For one-shot animations driven entirely by buttons, set `autoStart={false}` and call `controls.current?.play()` manually.
+
+---
+
+## 8. Render-prop API
+
+Pass a `render` prop to take full control of the surrounding markup. Items still come from `Typewriter.Item` children:
+
+```tsx
+<Typewriter
+  render={({ text, cursor, phase }) => (
+    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <span aria-hidden="true">{text}</span>
+      <span className="text-zinc-900">{cursor}</span>
+    </h1>
+  )}
+>
+  <Typewriter.Item>Compose freely</Typewriter.Item>
+</Typewriter>
+```
+
+When `render` is provided, the default `<span>` wrapper is skipped — you take full control.
+
+---
+
+## 9. Headless `useTypewriter` hook
+
+For fully custom UIs (e.g. typing into an SVG, integrating with another animation library), the hook accepts items as an array — strings or objects with overrides:
+
+```tsx
+import { useTypewriter, TypewriterCursor } from "eglador-ui-react-typewriter";
+
+function Hero() {
+  const { text, controls } = useTypewriter({
+    items: [
+      "First",
+      { text: "Second", typingSpeed: 100 },
+      "Third",
+    ],
+    deleteMode: "smart",
+  });
+
+  return (
+    <div>
+      <h1>
+        {text}
+        <TypewriterCursor variant="block" blink="hard" />
+      </h1>
+      <button onClick={controls.pause}>Pause</button>
+    </div>
+  );
+}
+```
+
+The hook returns `{ text, phase, index, loopCount, isPaused, isDone, controls }` and accepts the same options as the component (minus the cursor / styling props).
+
+---
+
+## 10. Reduced motion
+
+By default, the component honors `prefers-reduced-motion: reduce` — the last item is rendered instantly, no cursor. Disable with:
+
+```tsx
+<Typewriter respectReducedMotion={false}>
+  <Typewriter.Item>Always animate</Typewriter.Item>
+</Typewriter>
+```
+
+Recommended to leave on for accessibility.
+
+---
+
+## 11. Accessibility
+
+- Live text is rendered with `aria-hidden="true"` so screen readers don't announce every keystroke
+- The wrapping element has `role="text"` and `aria-label="<all items joined>"` so the full content is conveyed once
+- Override the label with the `ariaLabel` prop, or pass `null` to disable
+
+```tsx
+<Typewriter ariaLabel="Marketing tagline rotation">
+  <Typewriter.Item>Build with React.</Typewriter.Item>
+  <Typewriter.Item>Style with Tailwind.</Typewriter.Item>
+</Typewriter>
+```
+
+---
+
+## Result
+
+A complete hero animation in ~10 lines:
+
+```tsx
+"use client";
+
+import { Typewriter } from "eglador-ui-react-typewriter";
+
+export function Hero() {
+  return (
+    <h1 className="text-5xl font-bold text-zinc-900">
+      We{" "}
+      <Typewriter deleteMode="smart" className="text-blue-600">
+        <Typewriter.Item>build.</Typewriter.Item>
+        <Typewriter.Item>design.</Typewriter.Item>
+        <Typewriter.Item>ship.</Typewriter.Item>
+      </Typewriter>
+    </h1>
+  );
+}
+```
+
+---
+
+## Next Steps
+
+- Open the **Typewriter/Playground** story → toggle every option live in the Controls panel
+- Browse the preset stories: **SmartBackspace**, **PerItemOverrides**, **NaturalTyping**, **HardBlinkBlockCursor**, **CustomCursorChar**, **RenderProp**, **NonLooping**, **SingleString**, **Paragraph**
+- Click **Show code** in any story → copy-paste-ready usage examples
+
+---
+
+For bugs or suggestions, open an [issue on GitHub](https://github.com/eglador/eglador-ui-react-typewriter/issues).
